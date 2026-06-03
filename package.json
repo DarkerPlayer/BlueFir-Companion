@@ -1,17 +1,37 @@
 {
-  "name": "daily-planner",
+  "name": "bluefir-companion",
   "version": "1.0.0",
-  "description": "Two-day schedule planner with multi-device sync",
+  "description": "Local-first companion planner for elders and families",
   "main": "server.js",
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning server.js",
-    "dev": "node --disable-warning=ExperimentalWarning --watch server.js"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "legacy:start": "node --disable-warning=ExperimentalWarning server.js",
+    "legacy:dev": "node --disable-warning=ExperimentalWarning --watch server.js"
   },
   "engines": {
     "node": "24.x"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-notification": "^2.3.3",
+    "@tauri-apps/plugin-sql": "^2.4.0",
     "express": "^4.18.3",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
   }
 }

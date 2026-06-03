@@ -842,6 +842,116 @@ textarea {
   }
 }
 
+.template-grid,
+.stats-grid,
+.settings-list,
+.backup-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.template-grid,
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.template-card,
+.stat-card,
+.setting-row {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-strong);
+  padding: 16px;
+}
+
+.template-card h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.template-card p {
+  min-height: 48px;
+  margin: 0 0 14px;
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.stat-card {
+  display: grid;
+  gap: 8px;
+}
+
+.stat-card span,
+.setting-row span {
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.stat-card strong {
+  color: var(--accent-deep);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.setting-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.backup-actions {
+  grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+  margin-bottom: 14px;
+}
+
+.elder-mode {
+  --row-height: 72px;
+}
+
+.elder-mode .btn,
+.elder-mode input,
+.elder-mode textarea,
+.elder-mode select {
+  font-size: 18px;
+}
+
+.elder-mode .btn {
+  min-height: 48px;
+  padding-inline: 20px;
+}
+
+.elder-mode .slot-input,
+.elder-mode .summary-body {
+  font-size: 18px;
+}
+
+.high-contrast-mode {
+  --bg: #ffffff;
+  --bg-soft: #ffffff;
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --line: rgba(0, 0, 0, 0.28);
+  --line-strong: rgba(0, 0, 0, 0.52);
+  --text: #111111;
+  --text-soft: #333333;
+  --text-faint: #555555;
+  --accent: #176b6a;
+  --accent-deep: #064d4c;
+  --accent-soft: rgba(23, 107, 106, 0.14);
+}
+
+.simplified-layout .summary-panel,
+.simplified-layout .meta-row {
+  display: none;
+}
+
 /* 勾选框样式 */
 .slot-checkbox {
   position: absolute;
