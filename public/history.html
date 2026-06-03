@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史长河 | Time River</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/shared.js"></script>
+  <script defer src="/history.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar topbar-minimal">
+      <div class="topbar-actions">
+        <button class="btn" id="back-button" type="button">返回</button>
+        <button class="btn" id="history-print-button" type="button">打印</button>
+      </div>
+    </header>
+
+    <main class="history-layout">
+      <aside class="timeline-panel">
+        <div class="panel-header compact">
+          <h2>封存列表</h2>
+          <span class="timeline-count" id="timeline-count"></span>
+        </div>
+        <div class="timeline-list" id="timeline-list"></div>
+        <div class="empty-state hidden" id="timeline-empty">
+          <p>还没有封存内容。</p>
+        </div>
+      </aside>
+
+      <section class="archive-panel">
+        <div class="empty-state" id="detail-empty">
+          <p>选择左侧一条封存记录。</p>
+        </div>
+
+        <div class="archive-detail hidden" id="archive-detail">
+          <div class="panel-header">
+            <div>
+              <h2 id="archive-title"></h2>
+              <div class="archive-meta-line">
+                <span id="archive-created-at"></span>
+                <span id="archive-count"></span>
+              </div>
+            </div>
+          </div>
+
+          <section class="planner-card readonly compact-card">
+            <div class="mobile-day-switcher" aria-label="切换封存日期">
+              <button class="mobile-day-button active" type="button" data-history-day-switch="d1" aria-pressed="true">第一天</button>
+              <button class="mobile-day-button" type="button" data-history-day-switch="d2" aria-pressed="false">第二天</button>
+            </div>
+            <div class="days-grid readonly-days is-switchable" id="archive-days-grid" data-active-day="d1">
+              <section class="day-pane" data-day="d1">
+                <div class="day-card readonly">
+                  <div class="day-card-head">
+                    <span class="day-chip">第一天</span>
+                  </div>
+                  <strong class="readonly-day-name" id="archive-d1name"></strong>
+                  <span class="readonly-day-date" id="archive-d1date"></span>
+                </div>
+                <div class="day-column readonly" id="archive-column-d1"></div>
+              </section>
+
+              <section class="day-pane" data-day="d2">
+                <div class="day-card readonly">
+                  <div class="day-card-head">
+                    <span class="day-chip">第二天</span>
+                  </div>
+                  <strong class="readonly-day-name" id="archive-d2name"></strong>
+                  <span class="readonly-day-date" id="archive-d2date"></span>
+                </div>
+                <div class="day-column readonly" id="archive-column-d2"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="summary-panel visible simple-panel">
+            <div class="panel-header compact">
+              <h2>摘要</h2>
+            </div>
+            <pre class="summary-body" id="archive-summary-body"></pre>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>光阴长河 | Time River</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/shared.js"></script>
+  <script defer src="/main.js"></script>
+</head>
+<body>
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <div class="page-shell">
+    <header class="topbar topbar-minimal topbar-mobile-dock">
+      <div class="topbar-actions">
+        <div class="sync-status" id="sync-status">
+          <div class="sync-dot"></div>
+          <span id="sync-text">连接中</span>
+        </div>
+        <button class="btn" id="realm-create-button" type="button">封疆大吏</button>
+        <button class="btn btn-accent hidden" id="realm-share-button" type="button">疆域共治</button>
+        <button class="btn" id="history-button" type="button">历史长河</button>
+        <button class="btn btn-accent" id="seal-button" type="button">火漆封印</button>
+        <button class="btn" id="summary-button" type="button">摘要</button>
+        <button class="btn" id="print-button" type="button">打印</button>
+        <button class="btn btn-danger" id="clear-button" type="button">清空</button>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="planner-card">
+        <div class="mobile-day-switcher" aria-label="切换日期">
+          <button class="mobile-day-button active" type="button" data-day-switch="d1" aria-pressed="true">第一天</button>
+          <button class="mobile-day-button" type="button" data-day-switch="d2" aria-pressed="false">第二天</button>
+        </div>
+        <div class="days-grid is-switchable" id="days-grid-main" data-active-day="d1">
+          <section class="day-pane" data-day="d1">
+            <div class="day-card">
+              <div class="day-card-head">
+                <span class="day-chip">第一天</span>
+              </div>
+              <input id="d1name" placeholder="第一天">
+              <input class="date-input" id="d1date" placeholder="日期">
+            </div>
+            <div class="day-column" id="day-column-d1"></div>
+          </section>
+
+          <section class="day-pane" data-day="d2">
+            <div class="day-card">
+              <div class="day-card-head">
+                <span class="day-chip">第二天</span>
+              </div>
+              <input id="d2name" placeholder="第二天">
+              <input class="date-input" id="d2date" placeholder="日期">
+            </div>
+            <div class="day-column" id="day-column-d2"></div>
+          </section>
+        </div>
+      </section>
+
+      <div class="meta-row">
+        <div class="last-sync" id="last-sync"></div>
+        <div class="toast" id="toast"></div>
+      </div>
+
+      <section class="summary-panel" id="summary-panel">
+        <div class="panel-header">
+          <h2>摘要</h2>
+          <div class="panel-actions">
+            <span class="copy-feedback" id="copy-feedback">已复制</span>
+            <button class="btn" id="copy-button" type="button">复制</button>
+          </div>
+        </div>
+        <pre class="summary-body" id="summary-body"></pre>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="seal-modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="seal-title-heading">
+      <div class="modal-head">
+        <h2 id="seal-title-heading">火漆封印</h2>
+        <button class="icon-button" id="seal-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <label class="field-label" for="seal-title-input">历史事件名称</label>
+      <input class="modal-input" id="seal-title-input" type="text" maxlength="60" placeholder="例如：端午定稿">
+      <div class="modal-error hidden" id="seal-error"></div>
+      <div class="modal-actions">
+        <button class="btn" id="seal-cancel-button" type="button">取消</button>
+        <button class="btn btn-accent" id="seal-submit-button" type="button">封入长河</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="realm-modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="realm-title-heading">
+      <div class="modal-head">
+        <h2 id="realm-title-heading">封疆大吏</h2>
+        <button class="icon-button" id="realm-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <label class="field-label" for="realm-name-input">疆域名称</label>
+      <input class="modal-input" id="realm-name-input" type="text" maxlength="64" placeholder="例如：周末计划">
+      <div class="modal-error hidden" id="realm-error"></div>
+      <div class="modal-actions">
+        <button class="btn" id="realm-cancel-button" type="button">取消</button>
+        <button class="btn btn-accent" id="realm-submit-button" type="button">开疆辟土</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端展开弹窗 -->
+  <div class="slot-expand-backdrop" id="slot-expand-backdrop">
+    <div class="slot-expand-panel">
+      <div class="slot-expand-head">
+        <span class="slot-expand-title" id="slot-expand-title">编辑内容</span>
+        <button class="slot-expand-close" id="slot-expand-close" type="button">×</button>
+      </div>
+      <textarea class="slot-expand-textarea" id="slot-expand-textarea" placeholder="输入内容..."></textarea>
+      <div class="slot-expand-footer">
+        <label class="slot-expand-check" id="slot-expand-check">
+          <input type="checkbox" id="slot-expand-checkbox">
+          <span class="checkmark"></span>
+          <span>标记完成</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
