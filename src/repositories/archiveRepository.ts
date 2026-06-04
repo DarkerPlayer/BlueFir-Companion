@@ -1,5 +1,5 @@
 import { ScheduleData, mergeScheduleData } from '../lib/schedule';
-import { getDatabase, initializeDatabase, isTauriRuntime } from './database';
+import { getDatabase, initializeDatabase, shouldUseSqlite } from './database';
 
 const LOCAL_STORAGE_KEY = 'bluefir-companion-dev-archives';
 
@@ -126,5 +126,5 @@ function readLocalArchives(): ArchiveRecord[] {
 }
 
 export function createArchiveRepository(): ArchiveRepository {
-  return isTauriRuntime() ? new SqliteArchiveRepository() : new LocalStorageArchiveRepository();
+  return shouldUseSqlite() ? new SqliteArchiveRepository() : new LocalStorageArchiveRepository();
 }

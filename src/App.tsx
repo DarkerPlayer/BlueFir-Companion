@@ -25,13 +25,21 @@ const dayLabels: Record<DayKey, string> = {
 
 const checkedKeyFor = (dayKey: DayKey) => `${dayKey}checked` as const;
 
+interface EditingSlot {
+  dayKey: DayKey;
+  hour: number;
+  value: string;
+  checked: boolean;
+}
+
 export function App() {
   const { clearAll, data, load, loading, replaceSchedule, saveStatus, toggleChecked, updateMeta, updateSlot } = useScheduleStore();
   const { archives, createArchive, importArchives, loadArchives, selectedArchive, selectArchive } = useArchiveStore();
   const { exportSettings, importSettings, loadSettings, settings, updateSetting } = useSettingsStore();
   const { loadTemplates, templates } = useTemplateStore();
-  const [page, setPage] = useState<'planner' | 'history' | 'settings' | 'templates' | 'stats' | 'backup'>('planner');
+  const [page, setPage] = useState<'planner' | 'history' | 'settings' | 'templates' | 'stats' | 'backup' | 'help'>('planner');
   const [activeMobileDay, setActiveMobileDay] = useState<DayKey>('d1');
+  const [editingSlot, setEditingSlot] = useState<EditingSlot | null>(null);
   const [summaryVisible, setSummaryVisible] = useState(false);
 
   const summary = useMemo(() => buildSummary(data), [data]);
@@ -84,6 +92,16 @@ export function App() {
     setPage('planner');
   }
 
+  async function saveEditingSlot() {
+    if (!editingSlot) return;
+    const currentChecked = data.slots[editingSlot.hour][checkedKeyFor(editingSlot.dayKey)];
+    await updateSlot(editingSlot.dayKey, editingSlot.hour, editingSlot.value);
+    if (currentChecked !== editingSlot.checked) {
+      await toggleChecked(editingSlot.dayKey, editingSlot.hour);
+    }
+    setEditingSlot(null);
+  }
+
   const statusText = loading
     ? '读取本地数据'
     : saveStatus === 'saving'
@@ -111,6 +129,7 @@ export function App() {
           <button className="btn" type="button" onClick={() => setPage('stats')}>统计</button>
           <button className="btn" type="button" onClick={() => setPage('settings')}>设置</button>
           <button className="btn" type="button" onClick={() => setPage('backup')}>备份</button>
+          <button className="btn" type="button" onClick={() => setPage('help')}>帮助</button>
           {page === 'planner' ? (
             <button className="btn btn-accent" type="button" onClick={handleCreateArchive}>
               封存
@@ -152,6 +171,7 @@ export function App() {
                 dayKey={dayKey}
                 key={dayKey}
                 onMetaChange={updateMeta}
+                onOpenEditor={setEditingSlot}
                 onSlotChange={updateSlot}
                 onToggleChecked={toggleChecked}
               />
@@ -184,9 +204,17 @@ export function App() {
         <StatsPage archives={archives} data={data} />
       ) : page === 'settings' ? (
         <SettingsPage settings={settings} onUpdateSetting={updateSetting} />
+      ) : page === 'help' ? (
+        <HelpPage />
       ) : (
         <BackupPage onExportBackup={handleExportBackup} onImportBackup={handleImportBackup} />
       )}
+      <SlotEditPanel
+        editingSlot={editingSlot}
+        onChange={setEditingSlot}
+        onClose={() => setEditingSlot(null)}
+        onSave={() => void saveEditingSlot()}
+      />
     </div>
   );
 }
@@ -198,11 +226,12 @@ interface DayPaneProps {
     field: keyof Pick<ScheduleData, 'd1name' | 'd1date' | 'd2name' | 'd2date'>,
     value: string,
   ) => void;
+  onOpenEditor: (slot: EditingSlot) => void;
   onSlotChange: (dayKey: DayKey, hour: number, value: string) => void;
   onToggleChecked: (dayKey: DayKey, hour: number) => void;
 }
 
-function DayPane({ data, dayKey, onMetaChange, onSlotChange, onToggleChecked }: DayPaneProps) {
+function DayPane({ data, dayKey, onMetaChange, onOpenEditor, onSlotChange, onToggleChecked }: DayPaneProps) {
   const nameKey = `${dayKey}name` as const;
   const dateKey = `${dayKey}date` as const;
 
@@ -234,6 +263,7 @@ function DayPane({ data, dayKey, onMetaChange, onSlotChange, onToggleChecked }: 
             key={hour}
             value={data.slots[hour][dayKey]}
             onChange={onSlotChange}
+            onOpenEditor={onOpenEditor}
             onToggleChecked={onToggleChecked}
           />
         ))}
@@ -248,10 +278,11 @@ interface TimeSlotCellProps {
   hour: number;
   value: string;
   onChange: (dayKey: DayKey, hour: number, value: string) => void;
+  onOpenEditor: (slot: EditingSlot) => void;
   onToggleChecked: (dayKey: DayKey, hour: number) => void;
 }
 
-function TimeSlotCell({ checked, dayKey, hour, value, onChange, onToggleChecked }: TimeSlotCellProps) {
+function TimeSlotCell({ checked, dayKey, hour, value, onChange, onOpenEditor, onToggleChecked }: TimeSlotCellProps) {
   const period = getPeriodLabel(hour);
   const hasContent = Boolean(value.trim());
 
@@ -261,7 +292,15 @@ function TimeSlotCell({ checked, dayKey, hour, value, onChange, onToggleChecked 
         {period ? <span className="period-pill">{period}</span> : null}
         <span className="time-value">{formatHour(hour)}</span>
       </div>
-      <div className={`slot-card${hasContent ? ' has-content' : ''}${checked ? ' slot-checked' : ''}`}>
+      <div
+        className={`slot-card mobile-editable${hasContent ? ' has-content' : ''}${checked ? ' slot-checked' : ''}`}
+        onClick={() => {
+          if (window.matchMedia('(max-width: 720px)').matches) {
+            onOpenEditor({ dayKey, hour, value, checked });
+          }
+        }}
+      >
+        <div className="slot-text-preview">{value || '点击填写安排'}</div>
         <textarea
           className="slot-input"
           rows={1}
@@ -273,7 +312,10 @@ function TimeSlotCell({ checked, dayKey, hour, value, onChange, onToggleChecked 
             className={`slot-checkbox${checked ? ' checked' : ''}`}
             type="button"
             aria-label={checked ? '取消完成' : '标记完成'}
-            onClick={() => onToggleChecked(dayKey, hour)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleChecked(dayKey, hour);
+            }}
           >
             {checked ? (
               <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -290,6 +332,57 @@ function TimeSlotCell({ checked, dayKey, hour, value, onChange, onToggleChecked 
         ) : null}
       </div>
     </>
+  );
+}
+
+function SlotEditPanel({
+  editingSlot,
+  onChange,
+  onClose,
+  onSave,
+}: {
+  editingSlot: EditingSlot | null;
+  onChange: (slot: EditingSlot) => void;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  if (!editingSlot) return null;
+
+  const dayName = dayLabels[editingSlot.dayKey];
+  const period = getPeriodLabel(editingSlot.hour);
+
+  return (
+    <div className="slot-expand-backdrop visible">
+      <div className="slot-expand-panel">
+        <div className="slot-expand-head">
+          <span className="slot-expand-title">
+            {dayName} · {period || formatHour(editingSlot.hour)}
+          </span>
+          <button className="slot-expand-close" type="button" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <textarea
+          className="slot-expand-textarea"
+          value={editingSlot.value}
+          placeholder="输入内容..."
+          onChange={(event) => onChange({ ...editingSlot, value: event.target.value })}
+        />
+        <div className="slot-expand-footer">
+          <label className="slot-expand-check">
+            <input
+              type="checkbox"
+              checked={editingSlot.checked}
+              onChange={(event) => onChange({ ...editingSlot, checked: event.target.checked })}
+            />
+            <span>标记完成</span>
+          </label>
+          <button className="btn btn-accent" type="button" onClick={onSave}>
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -579,6 +672,41 @@ function BackupPage({
         <p className="summary-body">
           导出文件包含当前计划、历史归档和本地设置；导入时会覆盖当前本地数据。
         </p>
+      </section>
+    </main>
+  );
+}
+
+function HelpPage() {
+  return (
+    <main className="main-layout">
+      <section className="summary-panel visible simple-panel">
+        <div className="panel-header">
+          <h2>帮助说明</h2>
+        </div>
+        <div className="help-content">
+          <h3>日程规划</h3>
+          <p>在“规划”页面可以编辑第一天和第二天的安排。手机上点击任意时间格，会弹出编辑窗口；填写内容后点“保存”。</p>
+
+          <h3>完成勾选</h3>
+          <p>时间格有内容后会出现勾选按钮，可以标记已完成。统计页面会根据勾选状态计算完成率。</p>
+
+          <h3>历史归档</h3>
+          <p>点击“封存”会把当前计划保存为历史记录。进入“历史”后可以查看以前封存的计划和摘要。</p>
+
+          <h3>模板系统</h3>
+          <p>“模板”中内置退休生活、健康管理、阅读学习。应用模板会覆盖当前计划，适合快速开始。</p>
+
+          <h3>长者模式</h3>
+          <p>在“设置”中可以打开长者模式、高对比度和简化布局，方便长者在手机和平板上使用。</p>
+
+          <h3>数据备份</h3>
+          <p>“备份”页面可以导出和导入 backup.json。导入会覆盖当前计划、历史归档和设置，请先确认文件来源可靠。</p>
+
+          <h3>更新方式</h3>
+          <p>Android 不允许普通应用静默更新自己。当前最稳妥方式是生成新版 APK 后重新安装，安装时系统会保留同包名应用的数据。</p>
+          <p>后续可以接入“检查更新”：把 APK 发布到 GitHub Releases 或私有下载地址，应用内提示新版本并跳转下载；用户确认安装后完成升级。若上架应用商店，则由商店负责自动更新。</p>
+        </div>
       </section>
     </main>
   );

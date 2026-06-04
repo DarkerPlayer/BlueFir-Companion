@@ -1,5 +1,5 @@
 import { ScheduleData, emptyData, mergeScheduleData } from '../lib/schedule';
-import { getDatabase, initializeDatabase, isTauriRuntime } from './database';
+import { getDatabase, initializeDatabase, shouldUseSqlite } from './database';
 
 const LOCAL_STORAGE_KEY = 'bluefir-companion-dev-templates';
 
@@ -178,5 +178,5 @@ function readLocalTemplates(): TemplateRecord[] {
 }
 
 export function createTemplateRepository(): TemplateRepository {
-  return isTauriRuntime() ? new SqliteTemplateRepository() : new LocalStorageTemplateRepository();
+  return shouldUseSqlite() ? new SqliteTemplateRepository() : new LocalStorageTemplateRepository();
 }

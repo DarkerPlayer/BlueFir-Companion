@@ -6,6 +6,12 @@ export function isTauriRuntime(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+export function shouldUseSqlite(): boolean {
+  // The Android WebView build currently uses the localStorage repository path.
+  // This keeps the mobile app usable while the SQLite plugin is validated per-device.
+  return isTauriRuntime() && !/Android/i.test(window.navigator.userAgent);
+}
+
 export async function getDatabase(): Promise<Database> {
   if (!dbPromise) {
     dbPromise = Database.load('sqlite:bluefir-companion.db');

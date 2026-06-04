@@ -1,4 +1,4 @@
-import { getDatabase, initializeDatabase, isTauriRuntime } from './database';
+import { getDatabase, initializeDatabase, shouldUseSqlite } from './database';
 
 const LOCAL_STORAGE_KEY = 'bluefir-companion-dev-settings';
 
@@ -65,5 +65,5 @@ function readLocalSettings(): Record<string, string> {
 }
 
 export function createSettingsRepository(): SettingsRepository {
-  return isTauriRuntime() ? new SqliteSettingsRepository() : new LocalStorageSettingsRepository();
+  return shouldUseSqlite() ? new SqliteSettingsRepository() : new LocalStorageSettingsRepository();
 }

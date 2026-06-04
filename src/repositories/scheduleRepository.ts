@@ -1,5 +1,5 @@
 import { DAY_KEYS, HOURS, DayKey, ScheduleData, emptyData, mergeScheduleData } from '../lib/schedule';
-import { getDatabase, initializeDatabase, isTauriRuntime } from './database';
+import { getDatabase, initializeDatabase, shouldUseSqlite } from './database';
 
 const ACTIVE_SCHEDULE_ID = 'active';
 const LOCAL_STORAGE_KEY = 'bluefir-companion-dev-schedule';
@@ -150,5 +150,5 @@ async function ensureActiveSchedule(): Promise<void> {
 }
 
 export function createScheduleRepository(): ScheduleRepository {
-  return isTauriRuntime() ? new SqliteScheduleRepository() : new LocalStorageScheduleRepository();
+  return shouldUseSqlite() ? new SqliteScheduleRepository() : new LocalStorageScheduleRepository();
 }

@@ -357,7 +357,7 @@ textarea {
     overflow: hidden;
   }
 
-  .slot-card.has-content {
+  .slot-card.mobile-editable {
     cursor: pointer;
   }
 
@@ -377,6 +377,10 @@ textarea {
   .slot-card .slot-input {
     display: none;
   }
+}
+
+.slot-text-preview {
+  display: none;
 }
 
 /* 移动端展开遮罩层 */
@@ -454,6 +458,20 @@ textarea {
 
 .slot-expand-textarea:focus {
   border-color: var(--accent);
+}
+
+.slot-expand-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.slot-expand-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
 }
 
 .slot-card.has-content {
@@ -909,6 +927,22 @@ textarea {
 .backup-actions {
   grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
   margin-bottom: 14px;
+}
+
+.help-content {
+  display: grid;
+  gap: 10px;
+  color: var(--text-soft);
+  line-height: 1.8;
+}
+
+.help-content h3 {
+  margin: 14px 0 0;
+  color: var(--text);
+}
+
+.help-content p {
+  margin: 0;
 }
 
 .elder-mode {
