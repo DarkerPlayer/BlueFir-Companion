@@ -100,6 +100,28 @@ textarea {
   z-index: 20;
 }
 
+.topbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.topbar-brand strong {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.topbar-brand span {
+  color: var(--text-soft);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .topbar-minimal .topbar-actions {
   width: 100%;
 }
@@ -778,6 +800,15 @@ textarea {
     gap: 8px;
   }
 
+  .topbar-brand {
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .topbar-brand strong {
+    font-size: 24px;
+  }
+
   .topbar-mobile-dock {
     position: static;
     top: auto;
@@ -918,6 +949,26 @@ textarea {
   gap: 14px;
 }
 
+.setting-row-vertical {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.settings-input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+  outline: none;
+}
+
+.settings-input:focus {
+  border-color: var(--accent);
+}
+
 .setting-row input[type="checkbox"] {
   width: 22px;
   height: 22px;
@@ -943,6 +994,21 @@ textarea {
 
 .help-content p {
   margin: 0;
+}
+
+.update-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-strong);
+  color: var(--text-soft);
+  padding: 16px;
+}
+
+.update-card p {
+  margin: 0;
+  line-height: 1.7;
 }
 
 .elder-mode {
@@ -1012,15 +1078,16 @@ textarea {
 }
 
 .slot-checkbox.checked {
-  background: var(--accent);
-  border-color: var(--accent-deep);
+  background: linear-gradient(135deg, #d4a853, #f0d78c);
+  border-color: rgba(212, 168, 83, 0.74);
+  color: #5a4a1e;
   opacity: 1;
 }
 
 .slot-checkbox.checked svg {
-  width: 12px;
-  height: 12px;
-  color: white;
+  width: 15px;
+  height: 15px;
+  color: currentColor;
 }
 
 /* 勾选后的淡金色背景 - 模仿 has-content 的绿色效果 */
@@ -1062,20 +1129,20 @@ textarea {
 }
 
 .slot-expand-check input[type="checkbox"]:checked {
-  background: var(--accent);
-  border-color: var(--accent-deep);
+  background: linear-gradient(135deg, #d4a853, #f0d78c);
+  border-color: rgba(212, 168, 83, 0.74);
 }
 
 .slot-expand-check input[type="checkbox"]:checked::after {
-  content: '';
+  content: '➚';
   position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5a4a1e;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 /* 暗色模式下的勾选框样式 */

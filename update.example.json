@@ -1,0 +1,6 @@
+{
+  "version": "1.0.1",
+  "apkUrl": "https://example.com/downloads/BlueFir-Companion-arm64-debug.apk",
+  "notes": "修复移动端编辑体验，优化完成状态样式。",
+  "publishedAt": "2026-06-04"
+}

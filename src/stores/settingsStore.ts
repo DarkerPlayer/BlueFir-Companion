@@ -8,6 +8,7 @@ export interface AppSettings {
   highContrast: boolean;
   simplifiedLayout: boolean;
   reminderLeadMinutes: 0 | 5 | 10 | 30;
+  updateManifestUrl: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -15,6 +16,7 @@ const defaultSettings: AppSettings = {
   highContrast: false,
   simplifiedLayout: false,
   reminderLeadMinutes: 10,
+  updateManifestUrl: '',
 };
 
 interface SettingsState {
@@ -65,6 +67,7 @@ function parseSettings(values: Record<string, string>): AppSettings {
     highContrast: readBoolean(values['app.highContrast'], defaultSettings.highContrast),
     simplifiedLayout: readBoolean(values['app.simplifiedLayout'], defaultSettings.simplifiedLayout),
     reminderLeadMinutes: readReminderLead(values['app.reminderLeadMinutes']),
+    updateManifestUrl: readString(values['app.updateManifestUrl'], defaultSettings.updateManifestUrl),
   };
 }
 
@@ -86,5 +89,14 @@ function readReminderLead(value: string | undefined): AppSettings['reminderLeadM
       : defaultSettings.reminderLeadMinutes;
   } catch {
     return defaultSettings.reminderLeadMinutes;
+  }
+}
+
+function readString(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  try {
+    return String(JSON.parse(value));
+  } catch {
+    return fallback;
   }
 }

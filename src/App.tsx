@@ -13,6 +13,7 @@ import {
 import { ArchiveRecord } from './repositories/archiveRepository';
 import { TemplateRecord } from './repositories/templateRepository';
 import { createBackupPayload, downloadBackup, parseBackup } from './services/backupService';
+import { UpdateCheckResult, checkForUpdate, openApkDownload } from './services/updateService';
 import { useArchiveStore } from './stores/archiveStore';
 import { useScheduleStore } from './stores/scheduleStore';
 import { AppSettings, useSettingsStore } from './stores/settingsStore';
@@ -37,7 +38,7 @@ export function App() {
   const { archives, createArchive, importArchives, loadArchives, selectedArchive, selectArchive } = useArchiveStore();
   const { exportSettings, importSettings, loadSettings, settings, updateSetting } = useSettingsStore();
   const { loadTemplates, templates } = useTemplateStore();
-  const [page, setPage] = useState<'planner' | 'history' | 'settings' | 'templates' | 'stats' | 'backup' | 'help'>('planner');
+  const [page, setPage] = useState<'planner' | 'history' | 'settings' | 'templates' | 'stats' | 'backup' | 'help' | 'update'>('planner');
   const [activeMobileDay, setActiveMobileDay] = useState<DayKey>('d1');
   const [editingSlot, setEditingSlot] = useState<EditingSlot | null>(null);
   const [summaryVisible, setSummaryVisible] = useState(false);
@@ -115,6 +116,10 @@ export function App() {
       className={`page-shell${settings.elderMode ? ' elder-mode' : ''}${settings.highContrast ? ' high-contrast-mode' : ''}${settings.simplifiedLayout ? ' simplified-layout' : ''}`}
     >
       <header className="topbar topbar-minimal topbar-mobile-dock">
+        <div className="topbar-brand">
+          <strong>光阴长河</strong>
+          <span>Time River</span>
+        </div>
         <div className="topbar-actions">
           <div className={`sync-status ${saveStatus === 'error' ? 'error' : saveStatus === 'saving' ? 'syncing' : 'synced'}`}>
             <div className="sync-dot" />
@@ -129,6 +134,7 @@ export function App() {
           <button className="btn" type="button" onClick={() => setPage('stats')}>统计</button>
           <button className="btn" type="button" onClick={() => setPage('settings')}>设置</button>
           <button className="btn" type="button" onClick={() => setPage('backup')}>备份</button>
+          <button className="btn" type="button" onClick={() => setPage('update')}>更新</button>
           <button className="btn" type="button" onClick={() => setPage('help')}>帮助</button>
           {page === 'planner' ? (
             <button className="btn btn-accent" type="button" onClick={handleCreateArchive}>
@@ -204,6 +210,8 @@ export function App() {
         <StatsPage archives={archives} data={data} />
       ) : page === 'settings' ? (
         <SettingsPage settings={settings} onUpdateSetting={updateSetting} />
+      ) : page === 'update' ? (
+        <UpdatePage settings={settings} onUpdateSetting={updateSetting} />
       ) : page === 'help' ? (
         <HelpPage />
       ) : (
@@ -300,7 +308,7 @@ function TimeSlotCell({ checked, dayKey, hour, value, onChange, onOpenEditor, on
           }
         }}
       >
-        <div className="slot-text-preview">{value || '点击填写安排'}</div>
+        <div className="slot-text-preview">{value}</div>
         <textarea
           className="slot-input"
           rows={1}
@@ -318,9 +326,9 @@ function TimeSlotCell({ checked, dayKey, hour, value, onChange, onOpenEditor, on
             }}
           >
             {checked ? (
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path
-                  d="M3 8.5L6.5 12L13 4"
+                  d="M3 15.5L16.5 2M9.5 2H16.5V9M4 11.5L8.5 16L18 6.5"
                   stroke="currentColor"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -615,6 +623,95 @@ function SettingsPage({
               <option value={30}>提前 30 分钟</option>
             </select>
           </label>
+          <label className="setting-row setting-row-vertical">
+            <span>更新配置地址（update.json）</span>
+            <input
+              className="settings-input"
+              placeholder="https://example.com/bluefir/update.json"
+              value={settings.updateManifestUrl}
+              onChange={(event) => void onUpdateSetting('updateManifestUrl', event.target.value)}
+            />
+          </label>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function UpdatePage({
+  settings,
+  onUpdateSetting,
+}: {
+  settings: AppSettings;
+  onUpdateSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<void>;
+}) {
+  const [checking, setChecking] = useState(false);
+  const [message, setMessage] = useState('');
+  const [result, setResult] = useState<UpdateCheckResult | null>(null);
+
+  async function handleCheckUpdate() {
+    setChecking(true);
+    setMessage('');
+    setResult(null);
+
+    try {
+      const nextResult = await checkForUpdate(settings.updateManifestUrl);
+      setResult(nextResult);
+      setMessage(nextResult.hasUpdate ? '发现新版本，可以下载更新。' : '当前已经是最新版本。');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '检查更新失败');
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function handleDownloadUpdate() {
+    if (!result) return;
+    try {
+      await openApkDownload(result.manifest.apkUrl);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '打开下载地址失败');
+    }
+  }
+
+  return (
+    <main className="main-layout">
+      <section className="summary-panel visible simple-panel">
+        <div className="panel-header">
+          <h2>应用更新</h2>
+        </div>
+        <div className="settings-list">
+          <label className="setting-row setting-row-vertical">
+            <span>update.json 地址</span>
+            <input
+              className="settings-input"
+              placeholder="https://example.com/bluefir/update.json"
+              value={settings.updateManifestUrl}
+              onChange={(event) => void onUpdateSetting('updateManifestUrl', event.target.value)}
+            />
+          </label>
+          <div className="backup-actions">
+            <button className="btn btn-accent" type="button" disabled={checking} onClick={() => void handleCheckUpdate()}>
+              {checking ? '检查中' : '检查更新'}
+            </button>
+            {result?.hasUpdate ? (
+              <button className="btn" type="button" onClick={() => void handleDownloadUpdate()}>
+                下载并安装
+              </button>
+            ) : null}
+          </div>
+          {message ? <p className="summary-body">{message}</p> : null}
+          {result ? (
+            <div className="update-card">
+              <div>当前版本：{result.currentVersion}</div>
+              <div>最新版本：{result.manifest.version}</div>
+              {result.manifest.publishedAt ? <div>发布时间：{result.manifest.publishedAt}</div> : null}
+              <p>{result.manifest.notes}</p>
+            </div>
+          ) : null}
+          <p className="summary-body">
+            说明：Android 会要求用户确认安装新版 APK。这不是静默更新，但不需要再从电脑手动传 APK。
+          </p>
         </div>
       </section>
     </main>
@@ -705,7 +802,8 @@ function HelpPage() {
 
           <h3>更新方式</h3>
           <p>Android 不允许普通应用静默更新自己。当前最稳妥方式是生成新版 APK 后重新安装，安装时系统会保留同包名应用的数据。</p>
-          <p>后续可以接入“检查更新”：把 APK 发布到 GitHub Releases 或私有下载地址，应用内提示新版本并跳转下载；用户确认安装后完成升级。若上架应用商店，则由商店负责自动更新。</p>
+          <p>推荐方案是接入“应用内检查更新”：维护一个 update.json，里面写最新版本号、APK 下载地址和更新说明；App 启动或用户点击“检查更新”时读取它，发现新版后下载 APK，并调用系统安装器让用户确认安装。</p>
+          <p>如果后续发布到应用商店，商店更新体验最好；如果不上架，可以用 GitHub Releases、Gitee Releases、对象存储或自己的静态下载地址托管 APK。</p>
         </div>
       </section>
     </main>
