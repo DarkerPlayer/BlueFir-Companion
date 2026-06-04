@@ -116,10 +116,6 @@ export function App() {
       className={`page-shell${settings.elderMode ? ' elder-mode' : ''}${settings.highContrast ? ' high-contrast-mode' : ''}${settings.simplifiedLayout ? ' simplified-layout' : ''}`}
     >
       <header className="topbar topbar-minimal topbar-mobile-dock">
-        <div className="topbar-brand">
-          <strong>光阴长河</strong>
-          <span>Time River</span>
-        </div>
         <div className="topbar-actions">
           <div className={`sync-status ${saveStatus === 'error' ? 'error' : saveStatus === 'saving' ? 'syncing' : 'synced'}`}>
             <div className="sync-dot" />
@@ -156,6 +152,10 @@ export function App() {
       {page === 'planner' ? (
       <main className="main-layout">
         <section className="planner-card">
+          <div className="planner-brand">
+            <strong>光阴长河</strong>
+            <span>Time River</span>
+          </div>
           <div className="mobile-day-switcher" aria-label="切换日期">
             {DAY_KEYS.map((dayKey) => (
               <button

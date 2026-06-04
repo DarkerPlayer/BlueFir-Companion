@@ -100,22 +100,22 @@ textarea {
   z-index: 20;
 }
 
-.topbar-brand {
+.planner-brand {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   color: var(--text);
 }
 
-.topbar-brand strong {
+.planner-brand strong {
   font-family: var(--serif);
   font-size: 26px;
   font-weight: 600;
   line-height: 1;
 }
 
-.topbar-brand span {
+.planner-brand span {
   color: var(--text-soft);
   font-size: 13px;
   letter-spacing: 0.08em;
@@ -800,12 +800,12 @@ textarea {
     gap: 8px;
   }
 
-  .topbar-brand {
+  .planner-brand {
     justify-content: center;
     margin-bottom: 10px;
   }
 
-  .topbar-brand strong {
+  .planner-brand strong {
     font-size: 24px;
   }
 
@@ -1068,6 +1068,7 @@ textarea {
   justify-content: center;
   transition: all 0.2s ease;
   opacity: 0.6;
+  overflow: visible;
   z-index: 2;
 }
 
@@ -1085,9 +1086,13 @@ textarea {
 }
 
 .slot-checkbox.checked svg {
-  width: 15px;
-  height: 15px;
+  position: absolute;
+  right: -4px;
+  top: -7px;
+  width: 27px;
+  height: 27px;
   color: currentColor;
+  filter: drop-shadow(0 2px 2px rgba(90, 74, 30, 0.24));
 }
 
 /* 勾选后的淡金色背景 - 模仿 has-content 的绿色效果 */
@@ -1136,13 +1141,16 @@ textarea {
 .slot-expand-check input[type="checkbox"]:checked::after {
   content: '➚';
   position: absolute;
-  inset: 0;
+  right: -6px;
+  top: -9px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #5a4a1e;
-  font-size: 14px;
+  font-size: 27px;
   font-weight: 700;
+  line-height: 1;
+  filter: drop-shadow(0 2px 2px rgba(90, 74, 30, 0.24));
 }
 
 /* 暗色模式下的勾选框样式 */
